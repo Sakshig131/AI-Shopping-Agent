@@ -143,7 +143,7 @@ The shopping assistant is integrated with **IBM watsonx Orchestrate Embedded Age
 
 ## 🌐 Live Demo
 
-🔗 https://Sakshi131.github.io/Intelligent-Shopping-Agent/
+🔗 https://github.com/Sakshig131/AI-Shopping-Agent
 ---
 
 
