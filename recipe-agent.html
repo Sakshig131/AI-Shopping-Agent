@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Recipe Agent</title>
+
+<style>
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #f7f8fa;
+    color: #1f2328;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Header */
+
+header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+
+.header-icon {
+    width:36px;
+    height:36px;
+    background:#3b82d4;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+
+.header-icon svg {
+    width:22px;
+    height:22px;
+    fill:#fff;
+}
+
+
+.header-text h1 {
+    font-size:16px;
+    font-weight:600;
+}
+
+
+.header-text p {
+    font-size:12px;
+    color:#57606a;
+}
+
+
+.header-badge {
+
+    margin-left:auto;
+    background:#eaf1fb;
+    color:#3b82d4;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:20px;
+    border:1px solid #c3d9f5;
+
+}
+
+
+
+/* Hero */
+
+.hero {
+
+background:#fff;
+border-bottom:1px solid #e5e7eb;
+padding:36px 24px 28px;
+text-align:center;
+
+}
+
+
+.hero h2 {
+
+font-size:26px;
+font-weight:700;
+margin-bottom:10px;
+
+}
+
+
+.hero h2 span {
+
+color:#3b82d4;
+
+}
+
+
+.hero p {
+
+font-size:15px;
+color:#57606a;
+max-width:520px;
+margin:0 auto 22px;
+line-height:1.7;
+
+}
+
+
+.chips {
+
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px;
+
+}
+
+
+.chip {
+
+background:#f7f8fa;
+border:1px solid #e5e7eb;
+border-radius:20px;
+padding:5px 14px;
+font-size:13px;
+color:#57606a;
+display:flex;
+align-items:center;
+gap:6px;
+
+}
+
+
+.chip-dot {
+
+width:7px;
+height:7px;
+border-radius:50%;
+background:#3b82d4;
+
+}
+
+
+
+/* Main */
+
+main {
+
+flex:1;
+display:flex;
+gap:20px;
+padding:24px;
+max-width:1120px;
+width:100%;
+margin:auto;
+align-items:flex-start;
+
+}
+
+
+
+/* Sidebar */
+
+.sidebar {
+
+width:240px;
+display:flex;
+flex-direction:column;
+gap:16px;
+
+}
+
+
+.card {
+
+background:#fff;
+border:1px solid #e5e7eb;
+border-radius:10px;
+padding:16px;
+
+}
+
+
+.card-title {
+
+font-size:11px;
+font-weight:700;
+text-transform:uppercase;
+letter-spacing:.6px;
+color:#57606a;
+margin-bottom:12px;
+
+}
+
+
+.suggestion-list {
+
+list-style:none;
+display:flex;
+flex-direction:column;
+gap:6px;
+
+}
+
+
+.suggestion-list li {
+
+font-size:13px;
+color:#3b82d4;
+padding:6px 8px;
+
+}
+
+
+.suggestion-list li::before {
+
+content:"→ ";
+color:#57606a;
+
+}
+
+
+
+.category-grid {
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
+
+}
+
+
+.category-item {
+
+background:#f7f8fa;
+border:1px solid #e5e7eb;
+border-radius:6px;
+padding:8px;
+font-size:12px;
+text-align:center;
+
+}
+
+
+
+.tip-text {
+
+font-size:13px;
+color:#57606a;
+line-height:1.6;
+border-left:3px solid #3b82d4;
+padding-left:10px;
+
+}
+
+
+
+/* Chat */
+
+.chat-wrapper {
+
+flex:1;
+display:flex;
+flex-direction:column;
+gap:10px;
+
+}
+
+
+.chat-label {
+
+font-size:13px;
+color:#57606a;
+
+}
+
+
+#root {
+
+width:100%;
+height:600px;
+border-radius:10px;
+overflow:hidden;
+border:1px solid #e5e7eb;
+background:#fff;
+
+}
+
+
+
+/* Footer */
+
+footer {
+
+text-align:center;
+font-size:12px;
+color:#57606a;
+padding:14px;
+border-top:1px solid #e5e7eb;
+background:#fff;
+
+}
+
+
+
+@media(max-width:700px){
+
+main{
+
+flex-direction:column;
+
+}
+
+.sidebar{
+
+width:100%;
+
+}
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<div class="header-icon">
+
+<svg viewBox="0 0 32 32">
+<path d="M16 2C8.28 2 2 8.28 2 16s6.28 14 14 14 14-6.28 14-14S23.72 2 16 2z"/>
+</svg>
+
+</div>
+
+
+<div class="header-text">
+
+<h1>Recipe Agent</h1>
+
+<p>Powered by IBM watsonx Orchestrate</p>
+
+</div>
+
+
+<span class="header-badge">
+AI Assistant
+</span>
+
+
+</header>
+
+
+
+
+<div class="hero">
+
+<h2>Your Personal <span>Recipe Assistant</span></h2>
+
+
+<p>
+Ask me anything about cooking — from quick weeknight dinners to elaborate feasts.
+</p>
+
+
+<div class="chips">
+
+<span class="chip">
+<span class="chip-dot"></span>
+Recipe Discovery
+</span>
+
+
+<span class="chip">
+<span class="chip-dot"></span>
+Ingredient Substitution
+</span>
+
+
+<span class="chip">
+<span class="chip-dot"></span>
+Dietary Adaptations
+</span>
+
+
+<span class="chip">
+<span class="chip-dot"></span>
+Step-by-Step Guidance
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<main>
+
+
+<aside class="sidebar">
+
+
+<div class="card">
+
+<div class="card-title">
+Try asking
+</div>
+
+
+<ul class="suggestion-list">
+
+<li>Quick 30-minute pasta dishes</li>
+
+<li>Vegan desserts with chocolate</li>
+
+<li>Substitute for heavy cream</li>
+
+<li>High-protein meal prep ideas</li>
+
+</ul>
+
+
+</div>
+
+
+
+<div class="card">
+
+<div class="card-title">
+Browse by cuisine
+</div>
+
+
+<div class="category-grid">
+
+<div class="category-item">Italian</div>
+
+<div class="category-item">Asian</div>
+
+<div class="category-item">Mexican</div>
+
+<div class="category-item">Indian</div>
+
+</div>
+
+</div>
+
+
+</aside>
+
+
+
+
+<div class="chat-wrapper">
+
+<span class="chat-label">
+🟢 Agent is online and ready to help
+</span>
+
+
+<div id="root"></div>
+
+
+</div>
+
+
+</main>
+
+
+
+
+
+<footer>
+
+Made with IBM Bob
+
+</footer>
+
+
+
+
+
+<script>
+
+window.wxOConfiguration = {
+
+orchestrationID:
+"9262c030dbb746c2ad090867b875b17e_76494861-d8b8-4cd0-a0ae-96bc66250915",
+
+hostURL:
+"https://au-syd.watson-orchestrate.cloud.ibm.com",
+
+rootElementID:"root",
+
+deploymentPlatform:"ibmcloud",
+
+crn:
+"crn:v1:bluemix:public:watsonx-orchestrate:au-syd:a/9262c030dbb746c2ad090867b875b17e:76494861-d8b8-4cd0-a0ae-96bc66250915::",
+
+
+chatOptions: {
+
+agentId:
+"42d663dc-00c5-4bab-b6a0-3aa0391549d1"
+
+}
+
+};
+
+
+
+setTimeout(function(){
+
+const script=document.createElement("script");
+
+
+script.src =
+`${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+
+
+
+script.addEventListener("load",function(){
+
+wxoLoader.init();
+
+});
+
+
+document.head.appendChild(script);
+
+
+},0);
+
+
+</script>
+
+
+
+</body>
+
+</html>

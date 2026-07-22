@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Intelligent Shopping Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #f7f8fa;
+      --border: #e5e7eb;
+      --text: #1f2328;
+      --muted: #57606a;
+      --accent: #3b82d4;
+      --secondary: #7c5cd8;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ─────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;          /* kept lower than agent-section so it never bleeds over */
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      font-size: 17px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-brand span.dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--accent);
+    }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .nav-cta {
+      background: var(--accent); color: #fff !important;
+      padding: 6px 16px; border-radius: 6px;
+      font-size: 13px; font-weight: 600;
+    }
+    .nav-cta:hover { background: #2d6fbd; text-decoration: none !important; }
+
+    /* ── LAYOUT ──────────────────────────────────────────────── */
+    .container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+    section { padding: 56px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    /* ── HERO ────────────────────────────────────────────────── */
+    .hero {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      padding: 72px 20px 64px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: #eff6ff; color: var(--accent);
+      border: 1px solid #bfdbfe;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: .5px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .hero h1 { font-size: 36px; font-weight: 800; line-height: 1.25; margin-bottom: 16px; }
+    .hero h1 .highlight { color: var(--accent); }
+    .hero p { font-size: 16px; color: var(--muted); max-width: 520px; margin: 0 auto 32px; }
+
+    /* ── SEARCH ──────────────────────────────────────────────── */
+    .search-bar {
+      display: flex; max-width: 520px; margin: 0 auto;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      overflow: hidden; background: var(--bg);
+    }
+    .search-bar input {
+      flex: 1; padding: 12px 16px; border: none; outline: none;
+      font-size: 15px; color: var(--text); background: transparent;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar button {
+      padding: 12px 24px; background: var(--accent); color: #fff;
+      border: none; cursor: pointer; font-size: 14px; font-weight: 600;
+    }
+    .search-bar button:hover { background: #2d6fbd; }
+    .search-tags { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .tag {
+      display: inline-block; background: var(--bg);
+      border: 1px solid var(--border); color: var(--muted);
+      font-size: 12px; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── SECTION HEADER ──────────────────────────────────────── */
+    .section-header { text-align: center; margin-bottom: 36px; }
+    .section-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .section-header p { color: var(--muted); font-size: 14px; }
+
+    /* ── FEATURE CARDS ───────────────────────────────────────── */
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 18px;
+    }
+    .feature-card:hover { border-color: var(--accent); }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 12px;
+    }
+    .icon-blue   { background: #eff6ff; }
+    .icon-purple { background: #f5f3ff; }
+    .icon-green  { background: #f0fdf4; }
+    .icon-amber  { background: #fffbeb; }
+    .icon-teal   { background: #f0fdfa; }
+    .icon-rose   { background: #fff1f2; }
+    .feature-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ── PRODUCT CARDS ───────────────────────────────────────── */
+    .products-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .product-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .product-img {
+      width: 100%; height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .product-body { padding: 14px; }
+    .product-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .product-brand  { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .product-price  { font-size: 18px; font-weight: 800; }
+    .product-price .old { font-size: 13px; font-weight: 400; color: var(--muted); text-decoration: line-through; margin-left: 6px; }
+    .product-price .discount { font-size: 12px; font-weight: 700; color: var(--success); margin-left: 6px; }
+    .product-meta { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+    .pill-green  { background: #f0fdf4; color: var(--success); }
+    .pill-amber  { background: #fffbeb; color: var(--warning); }
+    .pill-blue   { background: #eff6ff; color: var(--accent); }
+    .pill-red    { background: #fff1f2; color: var(--danger); }
+    .pill-purple { background: #f5f3ff; color: var(--secondary); }
+    .stars { color: #f59e0b; font-size: 13px; letter-spacing: 1px; }
+    .product-footer { padding: 10px 14px 14px; display: flex; gap: 8px; }
+    .btn-primary {
+      flex: 1; background: var(--accent); color: #fff; border: none;
+      padding: 8px 0; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { background: #2d6fbd; }
+    .btn-outline {
+      background: var(--bg); color: var(--muted);
+      border: 1px solid var(--border); padding: 8px 12px;
+      border-radius: 6px; font-size: 13px; cursor: pointer;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .best-pick { border-color: var(--accent); position: relative; }
+    .best-pick-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--accent); color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+    }
+
+    /* ── DASHBOARD ───────────────────────────────────────────── */
+    .dashboard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .dashboard-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .dashboard-header h3 { font-size: 15px; font-weight: 700; }
+    .status-dot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--success); font-weight: 600; }
+    .status-dot::before { content:''; display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--success); }
+    .dash-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+    .dash-cell { padding: 20px 16px; border-right: 1px solid var(--border); }
+    .dash-cell:last-child { border-right: none; }
+    .dash-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+    .dash-value { font-size: 22px; font-weight: 800; }
+    .dash-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .dash-change-up   { color: var(--success); font-size: 12px; font-weight: 600; }
+    .dash-change-down { color: var(--danger);  font-size: 12px; font-weight: 600; }
+    .dash-table { width: 100%; border-collapse: collapse; }
+    .dash-table th {
+      text-align: left; font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .4px;
+      padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg);
+    }
+    .dash-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .dash-table tr:last-child td { border-bottom: none; }
+    .dash-table tr:hover td { background: var(--bg); }
+
+    /* ── BARS ────────────────────────────────────────────────── */
+    .bar-wrap { width: 100%; background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 20px; }
+    .bar-green  { background: var(--success); }
+    .bar-amber  { background: var(--warning); }
+    .bar-purple { background: var(--secondary); }
+
+    /* ── INSIGHTS ────────────────────────────────────────────── */
+    .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .insight-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+    .insight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .insight-row:last-child { margin-bottom: 0; }
+    .insight-label { font-size: 12px; color: var(--muted); width: 90px; flex-shrink: 0; }
+    .insight-bar { flex: 1; }
+    .insight-pct { font-size: 12px; font-weight: 700; width: 34px; text-align: right; }
+
+    /* ── ALERTS ──────────────────────────────────────────────── */
+    .alert { display: flex; gap: 12px; padding: 14px 16px; border-radius: var(--radius); border: 1px solid; margin-bottom: 12px; }
+    .alert:last-child { margin-bottom: 0; }
+    .alert-icon { font-size: 16px; flex-shrink: 0; }
+    .alert-body h5 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .alert-body p  { font-size: 12px; color: var(--muted); }
+    .alert-blue  { background: #eff6ff; border-color: #bfdbfe; }
+    .alert-green { background: #f0fdf4; border-color: #bbf7d0; }
+    .alert-amber { background: #fffbeb; border-color: #fde68a; }
+
+    /* ── AGENT FULLSCREEN SECTION ────────────────────────────── */
+    /*
+     * The agent section occupies a full viewport-height block.
+     * It creates its own stacking context (isolation + z-index)
+     * so the sticky nav and website cards never paint over the
+     * IBM widget's chat output.
+     *
+     * #root gets an explicit px height (100vh minus the two
+     * headers) so the IBM widget can measure itself and render:
+     *   welcome message → scrollable thread → pinned input bar
+     */
+    #agent-section {
+      /* own stacking context — nothing from the page above can bleed in */
+      position: relative;
+      z-index: 200;
+      isolation: isolate;
+
+      border-top: 2px solid var(--accent);
+      background: var(--bg);
+      padding: 0;
+
+      /* ensure the section itself is at least a full viewport tall */
+      min-height: 100vh;
+    }
+
+    #agent-section-header {
+      position: sticky;
+      top: 0;
+      z-index: 210;                /* sits above agent body */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      /* measured height = 18+18 padding + ~20 text + 2 border ≈ 58px
+         We store it in a CSS variable so #root can subtract it.    */
+    }
+    #agent-section-header .agent-title-wrap h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+    #agent-section-header .agent-title-wrap p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    #agent-section-header .agent-live {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--success);
+      flex-shrink: 0;
+    }
+    #agent-section-header .agent-live::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /*
+     * #root — IBM watsonx Orchestrate mounts here.
+     *
+     * Height = 100vh minus the agent-section header (58px).
+     * Using a concrete pixel value (not flex/auto) is essential —
+     * the widget measures this element at init to allocate space
+     * for welcome msg, thread, and the input bar at the bottom.
+     *
+     * overflow: hidden on the parent (#agent-section) and
+     * overflow: auto here let the widget scroll internally
+     * without any page-level content leaking in.
+     */
+    #root {
+      width: 100%;
+      height: calc(100vh - 58px);
+      min-height: 500px;
+      display: block;
+      overflow: hidden;
+      background: var(--bg);
+      position: relative;
+      z-index: 201;
+    }
+
+    /* Force any iframe / shadow-host IBM injects to fill root */
+    #root > * {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer { border-top: 1px solid var(--border); text-align: center; padding: 32px 20px 24px; color: var(--muted); font-size: 13px; }
+    .footer-links { display: flex; gap: 20px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .footer-links a { color: var(--muted); font-size: 13px; }
+    .footer-links a:hover { color: var(--accent); }
+    .made-with { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: #9ca3af; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 26px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .products-grid { grid-template-columns: 1fr; }
+      .dash-grid { grid-template-columns: 1fr 1fr; }
+      .dash-cell { border-bottom: 1px solid var(--border); }
+      .nav-links { display: none; }
+      #agent-section-header { flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 16px; }
+      /* On mobile header is ~70px tall */
+      #root { height: calc(100vh - 70px); min-height: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand"><span class="dot"></span> ShopAgent AI</div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#compare">Compare</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#agent-section" class="nav-cta">Try Agent</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero" id="home">
+    <div class="hero-badge">AI-Powered Shopping Intelligence</div>
+    <h1>🛍️ Intelligent <span class="highlight">Shopping Agent</span></h1>
+    <p>Compare products across stores, detect fake reviews, predict price drops, and get personalized recommendations — all in one place. Shop smarter, not harder.</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search products, brands, or categories…" />
+      <button onclick="handleSearch()">Search</button>
+    </div>
+    <div class="search-tags">
+      <span class="tag" onclick="setSearch('Wireless Headphones')">Wireless Headphones</span>
+      <span class="tag" onclick="setSearch('Laptop under $800')">Laptop under $800</span>
+      <span class="tag" onclick="setSearch('Running Shoes')">Running Shoes</span>
+      <span class="tag" onclick="setSearch('4K TV')">4K TV</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Everything you need to shop smarter</h2>
+        <p>Six powerful AI capabilities working together in real time</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">🔍</div>
+          <h3>Product Search</h3>
+          <p>Search millions of products across hundreds of retailers. Filter by price, rating, brand, and availability instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">📊</div>
+          <h3>Price Comparison</h3>
+          <p>Compare real-time prices from Amazon, Walmart, Best Buy, Target, and more. Never overpay again.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">🛡️</div>
+          <h3>Fake Review Detection</h3>
+          <p>Our NLP model identifies and filters manipulated or incentivized reviews so you only trust genuine feedback.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-green">📉</div>
+          <h3>Price Drop Prediction</h3>
+          <p>Machine-learning forecasts tell you the best time to buy — or whether to wait for an upcoming sale.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-teal">🌿</div>
+          <h3>Sustainability Score</h3>
+          <p>Each product is rated on packaging, carbon footprint, and ethical sourcing to support conscious purchasing.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-rose">✨</div>
+          <h3>Personalized Recs</h3>
+          <p>Tailored suggestions based on your preferences, purchase history, and real-time trend analysis.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT COMPARISON -->
+  <section id="compare">
+    <div class="container">
+      <div class="section-header">
+        <h2>Product Comparison</h2>
+        <p>Wireless headphones compared across top retailers — updated live</p>
+      </div>
+      <div class="products-grid">
+        <div class="product-card best-pick">
+          <div class="best-pick-badge">Best Pick</div>
+          <div class="product-img">🎧</div>
+          <div class="product-body">
+            <h4>Sony WH-1000XM5</h4>
+            <div class="product-brand">Sony · Noise Cancelling</div>
+            <div class="stars">★★★★★</div>
+            <div class="product-price">$279 <span class="old">$399</span><span class="discount">-30%</span></div>
+            <div class="product-meta">
+              <span class="pill pill-green">Genuine Reviews</span>
+              <span class="pill pill-blue">Price Drop Soon</span>
+              <span class="pill pill-green">Eco 8/10</span>
+            </div>
+          </div>
+          <div class="product-footer">
+            <button class="btn-primary">View Deal</button>
+            <button class="btn-outline">♡</button>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img">🎵</div>
+          <div class="product-body">
+            <h4>Bose QuietComfort 45</h4>
+            <div class="product-brand">Bose · Premium ANC</div>
+            <div class="stars">★★★★☆</div>
+            <div class="product-price">$249 <span class="old">$329</span><span class="discount">-24%</span></div>
+            <div class="product-meta">
+              <span class="pill pill-amber">Mixed Reviews</span>
+              <span class="pill pill-blue">Good Value</span>
+              <span class="pill pill-amber">Eco 6/10</span>
+            </div>
+          </div>
+          <div class="product-footer">
+            <button class="btn-primary">View Deal</button>
+            <button class="btn-outline">♡</button>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img">🎶</div>
+          <div class="product-body">
+            <h4>Apple AirPods Max</h4>
+            <div class="product-brand">Apple · Hi-Fi Audio</div>
+            <div class="stars">★★★★☆</div>
+            <div class="product-price">$449 <span class="old">$549</span><span class="discount">-18%</span></div>
+            <div class="product-meta">
+              <span class="pill pill-red">Overpriced</span>
+              <span class="pill pill-purple">Premium</span>
+              <span class="pill pill-green">Eco 7/10</span>
+            </div>
+          </div>
+          <div class="product-footer">
+            <button class="btn-primary">View Deal</button>
+            <button class="btn-outline">♡</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <div class="container">
+      <div class="section-header">
+        <h2>Shopping Intelligence Dashboard</h2>
+        <p>Real-time metrics and insights for smarter decisions</p>
+      </div>
+
+      <!-- KPI row -->
+      <div class="dashboard" style="margin-bottom:16px;">
+        <div class="dashboard-header">
+          <h3>Session Overview</h3>
+          <span class="status-dot">Live Data</span>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-cell">
+            <div class="dash-label">Avg. Rating</div>
+            <div class="dash-value">4.3 <span style="font-size:14px;color:#f59e0b;">★</span></div>
+            <div class="dash-sub dash-change-up">↑ 0.2 vs last month</div>
+          </div>
+          <div class="dash-cell">
+            <div class="dash-label">Best Price</div>
+            <div class="dash-value">$279</div>
+            <div class="dash-sub dash-change-down">↓ $120 saved today</div>
+          </div>
+          <div class="dash-cell">
+            <div class="dash-label">Review Score</div>
+            <div class="dash-value">92%</div>
+            <div class="dash-sub">Verified authentic</div>
+          </div>
+          <div class="dash-cell">
+            <div class="dash-label">Eco Score</div>
+            <div class="dash-value" style="color:var(--success);">8/10</div>
+            <div class="dash-sub dash-change-up">↑ Top 15% of category</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table + Insights -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="dashboard">
+          <div class="dashboard-header"><h3>Price by Retailer</h3></div>
+          <table class="dash-table">
+            <thead>
+              <tr><th>Store</th><th>Price</th><th>Trend</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Amazon</td><td><strong>$279</strong> <span class="pill pill-green" style="margin-left:4px;">Lowest</span></td><td class="dash-change-down">↓ 12%</td></tr>
+              <tr><td>Best Buy</td><td>$299</td><td class="dash-change-down">↓ 6%</td></tr>
+              <tr><td>Walmart</td><td>$309</td><td style="color:var(--muted);">→ Stable</td></tr>
+              <tr><td>Target</td><td>$319</td><td class="dash-change-up">↑ 3%</td></tr>
+              <tr><td>B&amp;H</td><td>$349</td><td style="color:var(--muted);">→ Stable</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="insight-card">
+            <h4>📈 Review Quality Breakdown</h4>
+            <div class="insight-row">
+              <span class="insight-label">Authentic</span>
+              <div class="insight-bar"><div class="bar-wrap"><div class="bar-fill bar-green" style="width:72%;"></div></div></div>
+              <span class="insight-pct">72%</span>
+            </div>
+            <div class="insight-row">
+              <span class="insight-label">Neutral</span>
+              <div class="insight-bar"><div class="bar-wrap"><div class="bar-fill bar-amber" style="width:20%;"></div></div></div>
+              <span class="insight-pct">20%</span>
+            </div>
+            <div class="insight-row">
+              <span class="insight-label">Suspicious</span>
+              <div class="insight-bar"><div class="bar-wrap"><div class="bar-fill bar-purple" style="width:8%;"></div></div></div>
+              <span class="insight-pct">8%</span>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <h4>🤖 Agent Recommendations</h4>
+            <div class="alert alert-green">
+              <span class="alert-icon">✅</span>
+              <div class="alert-body">
+                <h5>Buy Now</h5>
+                <p>Sony WH-1000XM5 is at a 6-month low. Unlikely to drop further before the holidays.</p>
+              </div>
+            </div>
+            <div class="alert alert-blue">
+              <span class="alert-icon">ℹ️</span>
+              <div class="alert-body">
+                <h5>Watch Bose QC45</h5>
+                <p>Price drop predicted in ~12 days. Set an alert to be notified.</p>
+              </div>
+            </div>
+            <div class="alert alert-amber">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-body">
+                <h5>Skip AirPods Max</h5>
+                <p>Currently overpriced relative to competitors with similar quality scores.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       IBM watsonx Orchestrate Agent — FULL-SCREEN SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="agent-section">
+    <div id="agent-section-header">
+      <div class="agent-title-wrap">
+        <h2>🛍️ Shopping Agent</h2>
+        <p>Powered by IBM watsonx Orchestrate — ask anything about products, prices, or recommendations</p>
+      </div>
+      <div class="agent-live">Live</div>
+    </div>
+    <!--
+      #root — IBM watsonx Orchestrate mounts here.
+      Height = 100vh minus the agent header height (89px).
+      This gives the widget a concrete pixel dimension so it can
+      render the welcome message, chat thread, and input bar in full.
+    -->
+    <div id="root"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">API Docs</a>
+      <a href="#">Support</a>
+      <a href="#">Blog</a>
+    </div>
+    <p>© 2025 ShopAgent AI. All prices are indicative and sourced in real time.</p>
+    <div class="made-with">Made with IBM Bob</div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       IBM watsonx Orchestrate — DO NOT MODIFY THIS SCRIPT BLOCK
+       ═══════════════════════════════════════════════════════════ -->
+  <script>
+    window.wxOConfiguration = {
+      orchestrationID: "9262c030dbb746c2ad090867b875b17e_76494861-d8b8-4cd0-a0ae-96bc66250915",
+      hostURL: "https://au-syd.watson-orchestrate.cloud.ibm.com",
+      rootElementID: "root",
+      deploymentPlatform: "ibmcloud",
+      crn: "crn:v1:bluemix:public:watsonx-orchestrate:au-syd:a/9262c030dbb746c2ad090867b875b17e:76494861-d8b8-4cd0-a0ae-96bc66250915::",
+      chatOptions: {
+          agentId: "05a6d5ad-8de9-40f8-bf4e-bb9d2ee1af61", 
+      }
+    };
+    setTimeout(function () {
+      const script = document.createElement('script');
+      script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+      script.addEventListener('load', function () {
+          wxoLoader.init();
+      });
+      document.head.appendChild(script);
+    }, 0);
+  </script>
+
+  <script>
+    function handleSearch() {
+      var val = document.getElementById('searchInput').value.trim();
+      if (val) {
+        document.getElementById('agent-section').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function setSearch(text) {
+      document.getElementById('searchInput').value = text;
+      document.getElementById('searchInput').focus();
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') handleSearch();
+    });
+  </script>
+
+</body>
+</html>
