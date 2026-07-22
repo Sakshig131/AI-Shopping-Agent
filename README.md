@@ -141,6 +141,9 @@ The shopping assistant is integrated with **IBM watsonx Orchestrate Embedded Age
 - AR/VR virtual shopping experience
 - Sustainability and authenticity scoring
 
+## 🌐 Live Demo
+
+🔗 https://Sakshi131.github.io/Intelligent-Shopping-Agent/
 ---
 
 
